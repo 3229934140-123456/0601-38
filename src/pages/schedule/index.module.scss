@@ -1,0 +1,226 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 120rpx;
+}
+
+.dateBar {
+  background: $color-bg-card;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-divider;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.dateScroll {
+  @include scroll-x-container;
+  padding: 0 $page-padding;
+}
+
+.dateItem {
+  @include scroll-x-item(100rpx);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-lg;
+  transition: all $transition-fast;
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-secondary 100%);
+
+    .day, .weekday {
+      color: $color-text-white;
+    }
+  }
+}
+
+.day {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.weekday {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.todayTag {
+  font-size: 18rpx;
+  color: $color-primary-light;
+  margin-top: 4rpx;
+}
+
+.section {
+  padding: $spacing-lg $page-padding 0;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.matchCard {
+  @include card-base;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6rpx;
+    background: $color-primary;
+  }
+
+  &.confirmed::before {
+    background: $color-success;
+  }
+
+  &.pending::before {
+    background: $color-warning;
+  }
+
+  &.finished::before {
+    background: $color-text-tertiary;
+  }
+}
+
+.matchHeader {
+  @include flex-between;
+  margin-bottom: $spacing-md;
+}
+
+.matchTime {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.matchType {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  background: $color-bg-tag;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+}
+
+.teamsRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.teamBlock {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.teamBlockRight {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.teamLogoSmall {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  flex-shrink: 0;
+}
+
+.teamLogoLeft {
+  margin-right: $spacing-sm;
+}
+
+.teamLogoRight {
+  margin-left: $spacing-sm;
+}
+
+.teamNameSmall {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.vsText {
+  padding: 0 $spacing-md;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+}
+
+.matchInfo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.infoItem {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.infoIcon {
+  font-size: 24rpx;
+}
+
+.matchActions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.actionBtn {
+  @include button-reset;
+  flex: 1;
+  height: 64rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.actionBtnPrimary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-secondary 100%);
+  color: $color-text-white;
+}
+
+.actionBtnSecondary {
+  background: $color-bg-input;
+  color: $color-text-primary;
+  border: 1rpx solid $color-border;
+}
+
+.emptyState {
+  padding: $spacing-xxl * 3 0;
+}

@@ -1,0 +1,53 @@
+// ============================================
+// 主题配色变量 - 电竞平台深色主题
+// ============================================
+
+// 品牌主题色
+$color-primary: #7B2FFD;
+$color-primary-light: #9D5EFF;
+$color-primary-dark: #5A1CC9;
+$color-primary-gradient: linear-gradient(135deg, #7B2FFD 0%, #00D1FF 100%);
+$color-secondary: #00D1FF;
+$color-secondary-light: #4DE3FF;
+
+// 功能色
+$color-success: #00E676;
+$color-warning: #FF9500;
+$color-error: #FF3B30;
+$color-info: #00D1FF;
+
+// 背景色 - 深色电竞主题
+$color-bg-page: #0F0F1A;
+$color-bg-card: #1A1A2E;
+$color-bg-card-hover: #252540;
+$color-bg-input: #252540;
+$color-bg-tag: rgba(123, 47, 253, 0.15);
+
+// 文本色
+$color-text-primary: #FFFFFF;
+$color-text-secondary: #B0B0C0;
+$color-text-tertiary: #6B6B80;
+$color-text-disabled: #4A4A60;
+$color-text-white: #FFFFFF;
+
+// 边框色
+$color-border: #2A2A45;
+$color-divider: #252540;
+
+// 游戏主题色
+$color-game-lol: #C89B3C;
+$color-game-valorant: #FF4655;
+$color-game-csgo: #DE9B33;
+$color-game-dota2: #CD3333;
+$color-game-overwatch: #FA9C1E;
+
+// 段位颜色
+$color-rank-iron: #6B6B80;
+$color-rank-bronze: #CD7F32;
+$color-rank-silver: #C0C0C0;
+$color-rank-gold: #FFD700;
+$color-rank-platinum: #00D4AA;
+$color-rank-diamond: #B9F2FF;
+$color-rank-master: #C89B3C;
+$color-rank-grandmaster: #FF4655;
+$color-rank-challenger: #00D1FF;

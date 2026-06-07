@@ -1,0 +1,175 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 120rpx;
+}
+
+.tabBar {
+  display: flex;
+  background: $color-bg-card;
+  padding: $spacing-sm $page-padding;
+  border-bottom: 1rpx solid $color-divider;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tabItem {
+  flex: 1;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-fast;
+
+  &.active {
+    color: $color-text-primary;
+    font-weight: $font-weight-semibold;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -$spacing-sm;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 48rpx;
+      height: 6rpx;
+      border-radius: 3rpx;
+      background: linear-gradient(90deg, $color-primary 0%, $color-secondary 100%);
+    }
+  }
+}
+
+.tabBadge {
+  position: absolute;
+  top: 4rpx;
+  right: 50%;
+  transform: translateX(60rpx);
+  min-width: 32rpx;
+  height: 32rpx;
+  padding: 0 8rpx;
+  background: $color-error;
+  color: $color-text-white;
+  font-size: 20rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerActions {
+  display: flex;
+  justify-content: flex-end;
+  padding: $spacing-sm $page-padding;
+}
+
+.readAllBtn {
+  font-size: $font-size-sm;
+  color: $color-primary-light;
+}
+
+.messageList {
+  background: $color-bg-card;
+}
+
+.messageItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md $page-padding;
+  border-bottom: 1rpx solid $color-divider;
+  position: relative;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
+    background: $color-bg-card-hover;
+  }
+}
+
+.avatarWrap {
+  position: relative;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: $radius-round;
+}
+
+.iconWrap {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+
+  &.system {
+    background: rgba($color-info, 0.15);
+  }
+
+  &.team {
+    background: rgba($color-warning, 0.15);
+  }
+}
+
+.unreadDot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20rpx;
+  height: 20rpx;
+  background: $color-error;
+  border-radius: $radius-round;
+  border: 3rpx solid $color-bg-card;
+}
+
+.messageContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.messageTop {
+  @include flex-between;
+  margin-bottom: $spacing-xs;
+}
+
+.messageTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+  flex: 1;
+
+  &.unread {
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.messageTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+}
+
+.messagePreview {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  @include text-ellipsis;
+  line-height: 1.4;
+}
+
+.emptyState {
+  padding: $spacing-xxl * 3 0;
+}

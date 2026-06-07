@@ -1,0 +1,361 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: $spacing-md $page-padding 120rpx;
+}
+
+.teamHeader {
+  position: relative;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-lg;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300rpx;
+    height: 300rpx;
+    background: radial-gradient(circle, rgba($color-secondary, 0.3) 0%, transparent 70%);
+    pointer-events: none;
+  }
+}
+
+.teamInfo {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.teamLogo {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: $radius-lg;
+  border: 3rpx solid rgba(255, 255, 255, 0.3);
+  margin-right: $spacing-lg;
+}
+
+.teamMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.teamName {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  margin-bottom: $spacing-xs;
+  @include text-ellipsis;
+}
+
+.teamMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.gameTag {
+  font-size: $font-size-xs;
+  color: $color-text-white;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4rpx 12rpx;
+  border-radius: $radius-round;
+}
+
+.rankTag {
+  font-size: $font-size-xs;
+  color: $color-secondary;
+  background: rgba($color-secondary, 0.2);
+  padding: 4rpx 12rpx;
+  border-radius: $radius-round;
+  font-weight: $font-weight-medium;
+}
+
+.teamStats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: $spacing-xl;
+  position: relative;
+  z-index: 2;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: $spacing-xs;
+}
+
+.announcement {
+  @include card-base;
+  padding: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-lg;
+  display: flex;
+  align-items: center;
+}
+
+.announcementIcon {
+  font-size: 32rpx;
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.announcementText {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  @include text-ellipsis;
+}
+
+.announcementMore {
+  font-size: $font-size-xs;
+  color: $color-primary-light;
+  margin-left: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.section {
+  margin-bottom: $spacing-lg;
+}
+
+.sectionHeader {
+  @include flex-between;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionAction {
+  font-size: $font-size-sm;
+  color: $color-primary-light;
+}
+
+.memberList {
+  @include card-base;
+  overflow: hidden;
+}
+
+.memberItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
+    background: $color-bg-card-hover;
+  }
+}
+
+.memberAvatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-round;
+  margin-right: $spacing-md;
+}
+
+.memberInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.memberNameRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-xs;
+}
+
+.memberName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.captainBadge {
+  font-size: 20rpx;
+  color: $color-warning;
+  background: rgba($color-warning, 0.15);
+  padding: 2rpx 8rpx;
+  border-radius: $radius-xs;
+  flex-shrink: 0;
+}
+
+.memberMeta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.positionTag {
+  font-size: $font-size-xs;
+  color: $color-secondary;
+  background: rgba($color-secondary, 0.15);
+  padding: 2rpx 10rpx;
+  border-radius: $radius-xs;
+}
+
+.rankText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.addMemberBtn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-round;
+  background: $color-bg-tag;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-primary-light;
+  font-size: 36rpx;
+  flex-shrink: 0;
+}
+
+.recommendSection {
+  margin-top: $spacing-lg;
+}
+
+.recommendCard {
+  @include card-base;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+
+  &:active {
+    background: $color-bg-card-hover;
+  }
+}
+
+.recommendLogo {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-md;
+  margin-right: $spacing-md;
+}
+
+.recommendInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.recommendName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+  @include text-ellipsis;
+}
+
+.recommendMeta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.recommendMetaText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.joinBtn {
+  @include button-reset;
+  height: 56rpx;
+  padding: 0 $spacing-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-secondary 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  flex-shrink: 0;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.95);
+  }
+}
+
+.emptyState {
+  @include card-base;
+  padding: $spacing-xxl $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.emptyIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+}
+
+.emptyTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.emptyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  text-align: center;
+  margin-bottom: $spacing-lg;
+}
+
+.emptyActions {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.emptyBtn {
+  @include button-reset;
+  height: 72rpx;
+  padding: 0 $spacing-xl;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.95);
+  }
+}
+
+.emptyBtnPrimary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-secondary 100%);
+  color: $color-text-white;
+}
+
+.emptyBtnSecondary {
+  background: $color-bg-input;
+  color: $color-text-primary;
+  border: 1rpx solid $color-border;
+}
