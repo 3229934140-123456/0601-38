@@ -1,29 +1,33 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import classnames from 'classnames';
 import Tag from '@/components/Tag';
 import { seasonStats, heroStats } from '@/data/user';
-import { gameRecords } from '@/data/records';
-import { GameRecord } from '@/types';
+import { useAppStore } from '@/store';
+import { GAME_NAMES } from '@/types';
 
 const tabs = ['全部', '胜利', '失败'];
 
 const RecordPage: React.FC = () => {
+  const gameRecords = useAppStore((state) => state.gameRecords);
+
   const [activeTab, setActiveTab] = useState('全部');
-  const [records, setRecords] = useState<GameRecord[]>(gameRecords);
+
+  const records = useMemo(() => {
+    if (activeTab === '全部') {
+      return gameRecords;
+    } else if (activeTab === '胜利') {
+      return gameRecords.filter(r => r.result === 'win');
+    } else {
+      return gameRecords.filter(r => r.result === 'lose');
+    }
+  }, [activeTab, gameRecords]);
 
   const handleTabChange = useCallback((tab: string) => {
     console.log('[Record] tab changed:', tab);
     setActiveTab(tab);
-    if (tab === '全部') {
-      setRecords(gameRecords);
-    } else if (tab === '胜利') {
-      setRecords(gameRecords.filter(r => r.result === 'win'));
-    } else {
-      setRecords(gameRecords.filter(r => r.result === 'lose'));
-    }
   }, []);
 
   const handleRecordClick = useCallback((recordId: string) => {
@@ -32,6 +36,10 @@ const RecordPage: React.FC = () => {
       console.error('[Record] navigate error:', err);
     });
   }, []);
+
+  const getGameName = (gameKey: string) => {
+    return GAME_NAMES[gameKey as keyof typeof GAME_NAMES] || gameKey;
+  };
 
   return (
     <View className={styles.page}>
@@ -121,7 +129,7 @@ const RecordPage: React.FC = () => {
                 vs {record.opponentTeam}
               </Text>
               <View className={styles.recordMeta}>
-                <Text className={styles.recordMetaText}>{record.game}</Text>
+                <Text className={styles.recordMetaText}>{getGameName(record.game)}</Text>
                 <Text className={styles.recordMetaText}>·</Text>
                 <Text className={styles.recordMetaText}>{record.map}</Text>
                 <Text className={styles.recordMetaText}>·</Text>

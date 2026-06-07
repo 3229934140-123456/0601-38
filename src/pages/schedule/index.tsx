@@ -1,13 +1,13 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import classnames from 'classnames';
 import Tag from '@/components/Tag';
 import EmptyState from '@/components/EmptyState';
-import { scheduleList } from '@/data/matches';
+import { useAppStore } from '@/store';
 import { myTeam } from '@/data/teams';
-import { ScheduleItem } from '@/types';
+import { GAME_NAMES } from '@/types';
 
 const dates = [
   { day: '今天', weekday: '周六', isToday: true },
@@ -19,9 +19,19 @@ const dates = [
   { day: '14', weekday: '周五', isToday: false }
 ];
 
+const dateTitles = ['今日赛程', '明日赛程', '周六赛程', '周日赛程', '周一赛程', '周二赛程', '周三赛程'];
+
 const SchedulePage: React.FC = () => {
   const [activeDate, setActiveDate] = useState(0);
-  const [schedules, setSchedules] = useState<ScheduleItem[]>(scheduleList);
+
+  const getSchedulesByDateIndex = useAppStore((state) => state.getSchedulesByDateIndex);
+  const confirmSchedule = useAppStore((state) => state.confirmSchedule);
+  const toggleReminder = useAppStore((state) => state.toggleReminder);
+  const hasReminder = useAppStore((state) => state.hasReminder);
+
+  const schedules = useMemo(() => {
+    return getSchedulesByDateIndex(activeDate);
+  }, [activeDate, getSchedulesByDateIndex]);
 
   const handleDateChange = useCallback((index: number) => {
     console.log('[Schedule] date changed:', index);
@@ -37,19 +47,22 @@ const SchedulePage: React.FC = () => {
       confirmColor: '#7B2FFD',
       success: (res) => {
         if (res.confirm) {
-          setSchedules(prev =>
-            prev.map(s => (s.id === id ? { ...s, status: 'confirmed' } : s))
-          );
+          confirmSchedule(id);
           Taro.showToast({ title: '已确认', icon: 'success' });
         }
       }
     });
-  }, []);
+  }, [confirmSchedule]);
 
   const handleRemind = useCallback((id: string) => {
-    console.log('[Schedule] set reminder:', id);
-    Taro.showToast({ title: '已设置提醒', icon: 'success' });
-  }, []);
+    console.log('[Schedule] toggle reminder:', id);
+    toggleReminder(id);
+    const has = hasReminder(id);
+    Taro.showToast({
+      title: has ? '已取消提醒' : '已设置提醒',
+      icon: 'success'
+    });
+  }, [toggleReminder, hasReminder]);
 
   const getStatusTag = (status: string) => {
     switch (status) {
@@ -71,6 +84,10 @@ const SchedulePage: React.FC = () => {
       case 'training': return '队内训练';
       default: return '其他';
     }
+  };
+
+  const getGameName = (gameKey: string) => {
+    return GAME_NAMES[gameKey as keyof typeof GAME_NAMES] || gameKey;
   };
 
   return (
@@ -98,7 +115,7 @@ const SchedulePage: React.FC = () => {
       </View>
 
       <View className={styles.section}>
-        <Text className={styles.sectionTitle}>今日赛程</Text>
+        <Text className={styles.sectionTitle}>{dateTitles[activeDate] || '赛程'}</Text>
         {schedules.length > 0 ? (
           schedules.map(item => (
             <View
@@ -133,13 +150,16 @@ const SchedulePage: React.FC = () => {
               <View className={styles.matchInfo}>
                 <View className={styles.infoItem}>
                   <Text className={styles.infoIcon}>🎮</Text>
-                  <Text>{item.game}</Text>
+                  <Text>{getGameName(item.game)}</Text>
                 </View>
                 <View className={styles.infoItem}>
                   <Text className={styles.infoIcon}>📍</Text>
                   <Text>线上</Text>
                 </View>
                 {getStatusTag(item.status)}
+                {hasReminder(item.id) && (
+                  <Tag text="已设提醒" type="info" size="sm" />
+                )}
               </View>
 
               {item.status === 'pending' && (
@@ -162,10 +182,14 @@ const SchedulePage: React.FC = () => {
               {item.status === 'confirmed' && (
                 <View className={styles.matchActions}>
                   <View
-                    className={classnames(styles.actionBtn, styles.actionBtnSecondary)}
+                    className={classnames(
+                      styles.actionBtn,
+                      styles.actionBtnSecondary,
+                      hasReminder(item.id) && styles.actionBtnActive
+                    )}
                     onClick={() => handleRemind(item.id)}
                   >
-                    <Text>设置提醒</Text>
+                    <Text>{hasReminder(item.id) ? '取消提醒' : '设置提醒'}</Text>
                   </View>
                   <View
                     className={classnames(styles.actionBtn, styles.actionBtnPrimary)}
@@ -180,7 +204,7 @@ const SchedulePage: React.FC = () => {
         ) : (
           <View className={styles.emptyState}>
             <EmptyState
-              title="今日暂无赛程"
+              title="暂无赛程"
               description="去约战大厅找一支队伍来场训练赛吧"
             />
           </View>

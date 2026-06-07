@@ -1,34 +1,60 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, Image, ScrollView, Textarea } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useRouter } from '@tarojs/taro';
 import styles from './index.module.scss';
 import classnames from 'classnames';
-import { gameRecords } from '@/data/records';
+import { useAppStore } from '@/store';
 import { GameRecord } from '@/types';
+import { myTeam } from '@/data/teams';
 
 const ReviewPage: React.FC = () => {
-  const [record] = useState<GameRecord>(gameRecords[0]);
-  const [reviewNote, setReviewNote] = useState(record.reviewNote || '');
-  const [punctuality, setPunctuality] = useState(record.opponentPunctuality || 0);
-  const [mistakes, setMistakes] = useState<string[]>(record.keyMistakes || []);
+  const router = useRouter();
+  const recordId = router.params.id || 'record_001';
+
+  const getGameRecordById = useAppStore((state) => state.getGameRecordById);
+  const updateGameRecord = useAppStore((state) => state.updateGameRecord);
+
+  const [record, setRecord] = useState<GameRecord | null>(null);
+  const [reviewNote, setReviewNote] = useState('');
+  const [punctuality, setPunctuality] = useState(0);
+  const [mistakes, setMistakes] = useState<string[]>([]);
+
+  useEffect(() => {
+    const data = getGameRecordById(recordId);
+    if (data) {
+      setRecord(data);
+      setReviewNote(data.reviewNote || '');
+      setPunctuality(data.opponentPunctuality || 0);
+      setMistakes(data.keyMistakes || []);
+    }
+  }, [recordId, getGameRecordById]);
 
   const handleScreenshotClick = useCallback((index: number) => {
     console.log('[Review] screenshot clicked:', index);
+    if (!record?.screenshots) return;
     Taro.previewImage({
-      current: record.screenshots?.[index] || '',
-      urls: record.screenshots || []
+      current: record.screenshots[index] || '',
+      urls: record.screenshots
     });
-  }, [record.screenshots]);
+  }, [record]);
 
   const handleSubmit = useCallback(() => {
     console.log('[Review] submit review');
+    if (!record) return;
+
+    updateGameRecord(record.id, {
+      reviewNote,
+      opponentPunctuality: punctuality,
+      keyMistakes: mistakes
+    });
+
     Taro.showToast({ title: '复盘已提交', icon: 'success' });
     setTimeout(() => {
       Taro.navigateBack().catch(err => {
         console.error('[Review] navigateBack error:', err);
       });
     }, 1500);
-  }, []);
+  }, [record, reviewNote, punctuality, mistakes, updateGameRecord]);
 
   const handleAddMistake = useCallback(() => {
     console.log('[Review] add mistake');
@@ -67,6 +93,16 @@ const ReviewPage: React.FC = () => {
     );
   };
 
+  if (!record) {
+    return (
+      <View className={styles.page}>
+        <View className={styles.loading}>
+          <Text>加载中...</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View className={styles.page}>
       <View className={classnames(styles.resultHeader, record.result)}>
@@ -77,10 +113,10 @@ const ReviewPage: React.FC = () => {
           <View className={styles.scoreTeam}>
             <Image
               className={styles.teamLogo}
-              src="https://picsum.photos/id/1/200/200"
+              src={myTeam.logo}
               mode="aspectFill"
             />
-            <Text className={styles.teamName}>暗夜猎手</Text>
+            <Text className={styles.teamName}>{record.ourTeam}</Text>
             <Text className={styles.scoreBig}>{record.ourScore}</Text>
           </View>
           <Text className={styles.vsText}>VS</Text>

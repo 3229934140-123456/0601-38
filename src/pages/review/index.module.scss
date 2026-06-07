@@ -295,3 +295,12 @@
     opacity: 0.9;
   }
 }
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: $color-text-secondary;
+  font-size: $font-size-md;
+}

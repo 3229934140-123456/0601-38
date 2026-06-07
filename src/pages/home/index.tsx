@@ -4,21 +4,23 @@ import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import Tag from '@/components/Tag';
 import { currentUser, seasonStats } from '@/data/user';
-import { matchRequests, scheduleList } from '@/data/matches';
+import { useAppStore } from '@/store';
 import { GAME_NAMES } from '@/types';
 
 const HomePage: React.FC = () => {
+  const matchRequests = useAppStore((state) => state.matchRequests);
+  const scheduleList = useAppStore((state) => state.scheduleList);
+
   const quickActions = [
-    { icon: '⚔️', text: '发布约战', path: '/pages/match/index' },
-    { icon: '👥', text: '我的队伍', path: '/pages/team/index' },
-    { icon: '📅', text: '赛程', path: '/pages/schedule/index' },
-    { icon: '🏆', text: '战绩', path: '/pages/record/index' }
+    { icon: '⚔️', text: '发布约战', path: '/pages/match/index', isTab: true },
+    { icon: '👥', text: '我的队伍', path: '/pages/team/index', isTab: true },
+    { icon: '📅', text: '赛程', path: '/pages/schedule/index', isTab: false },
+    { icon: '🏆', text: '战绩', path: '/pages/record/index', isTab: true }
   ];
 
-  const handleActionClick = useCallback((path: string) => {
+  const handleActionClick = useCallback((path: string, isTab: boolean) => {
     console.log('[Home] navigate to:', path);
-    if (path.startsWith('/pages/match') || path.startsWith('/pages/team') ||
-        path.startsWith('/pages/record') || path.startsWith('/pages/message')) {
+    if (isTab) {
       Taro.switchTab({ url: path }).catch(err => {
         console.error('[Home] switchTab error:', err);
       });
@@ -31,8 +33,8 @@ const HomePage: React.FC = () => {
 
   const handleMatchClick = useCallback((id: string) => {
     console.log('[Home] match clicked:', id);
-    Taro.navigateTo({ url: `/pages/match/index?id=${id}` }).catch(err => {
-      console.error('[Home] navigate match error:', err);
+    Taro.switchTab({ url: '/pages/match/index' }).catch(err => {
+      console.error('[Home] switchTab error:', err);
     });
   }, []);
 
@@ -55,6 +57,12 @@ const HomePage: React.FC = () => {
         return <Tag text="待开始" type="primary" size="sm" />;
     }
   };
+
+  const getGameName = (gameKey: string) => {
+    return GAME_NAMES[gameKey as keyof typeof GAME_NAMES] || gameKey;
+  };
+
+  const todaySchedules = scheduleList.filter((s) => s.dateIndex === 0).slice(0, 3);
 
   return (
     <View className={styles.page}>
@@ -81,7 +89,7 @@ const HomePage: React.FC = () => {
             <View
               key={index}
               className={styles.actionItem}
-              onClick={() => handleActionClick(action.path)}
+              onClick={() => handleActionClick(action.path, action.isTab)}
             >
               <View className={styles.actionIcon}>
                 <Text>{action.icon}</Text>
@@ -113,7 +121,12 @@ const HomePage: React.FC = () => {
         <View className={styles.section}>
           <View className={styles.sectionHeader}>
             <Text className={styles.sectionTitle}>推荐约战</Text>
-            <Text className={styles.sectionMore}>查看更多</Text>
+            <Text
+              className={styles.sectionMore}
+              onClick={() => handleActionClick('/pages/match/index', true)}
+            >
+              查看更多
+            </Text>
           </View>
           <ScrollView
             className={styles.matchScroll}
@@ -131,7 +144,7 @@ const HomePage: React.FC = () => {
                   <View className={styles.teamInfo}>
                     <Text className={styles.teamName}>{match.teamName}</Text>
                     <Text className={styles.teamRank}>
-                      {GAME_NAMES[match.game as keyof typeof GAME_NAMES] || match.game} · {match.rank}
+                      {getGameName(match.game)} · {match.rank}
                     </Text>
                   </View>
                 </View>
@@ -151,13 +164,13 @@ const HomePage: React.FC = () => {
             <Text className={styles.sectionTitle}>即将开始</Text>
             <Text
               className={styles.sectionMore}
-              onClick={() => handleActionClick('/pages/schedule/index')}
+              onClick={() => handleActionClick('/pages/schedule/index', false)}
             >
               全部赛程
             </Text>
           </View>
           <View className={styles.scheduleList}>
-            {scheduleList.slice(0, 3).map(item => (
+            {todaySchedules.map(item => (
               <View
                 key={item.id}
                 className={styles.scheduleItem}
@@ -170,7 +183,7 @@ const HomePage: React.FC = () => {
                 <View className={styles.scheduleInfo}>
                   <Text className={styles.scheduleTitle}>{item.title}</Text>
                   <Text className={styles.scheduleSub}>
-                    {GAME_NAMES[item.game as keyof typeof GAME_NAMES] || item.game} · {item.opponent}
+                    {getGameName(item.game)} · {item.opponent}
                   </Text>
                 </View>
                 <View className={styles.scheduleStatus}>

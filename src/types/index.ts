@@ -83,6 +83,7 @@ export interface ScheduleItem {
   title: string;
   time: string;
   date: string;
+  dateIndex?: number;
   game: string;
   opponent: string;
   status: 'pending' | 'confirmed' | 'finished';

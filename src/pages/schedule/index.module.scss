@@ -219,6 +219,12 @@
   background: $color-bg-input;
   color: $color-text-primary;
   border: 1rpx solid $color-border;
+
+  &.actionBtnActive {
+    background: rgba($color-secondary, 0.15);
+    color: $color-secondary;
+    border-color: $color-secondary;
+  }
 }
 
 .emptyState {
