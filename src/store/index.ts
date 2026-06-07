@@ -4,7 +4,7 @@ import { matchRequests as initialMatchRequests } from '@/data/matches';
 import { gameRecords as initialGameRecords } from '@/data/records';
 import { myTeam } from '@/data/teams';
 
-const dateLabels = ['今天', '明天', '周六', '周日', '周一', '周二', '周三'];
+const dateLabels = ['今天', '明天', '周三', '周四', '周五', '周六', '周日'];
 
 const initialSchedules: ScheduleItem[] = [
   {
@@ -50,7 +50,8 @@ const initialSchedules: ScheduleItem[] = [
     opponent: '幻影军团',
     opponentLogo: 'https://picsum.photos/id/3/200/200',
     status: 'pending',
-    type: 'scrim'
+    type: 'scrim',
+    members: myTeam.members
   },
   {
     id: 'sched_004',
@@ -72,7 +73,7 @@ const initialSchedules: ScheduleItem[] = [
     title: '周末杯小组赛',
     time: '14:00',
     date: '周六',
-    dateIndex: 2,
+    dateIndex: 5,
     game: 'lol',
     mode: '5v5',
     map: '召唤师峡谷',
@@ -85,8 +86,8 @@ const initialSchedules: ScheduleItem[] = [
     id: 'sched_006',
     title: '训练赛 vs 银河战舰',
     time: '19:00',
-    date: '周日',
-    dateIndex: 3,
+    date: '周六',
+    dateIndex: 5,
     game: 'lol',
     mode: '5v5',
     map: '召唤师峡谷',
@@ -100,7 +101,7 @@ const initialSchedules: ScheduleItem[] = [
     title: '周末杯半决赛',
     time: '19:00',
     date: '周日',
-    dateIndex: 3,
+    dateIndex: 6,
     game: 'lol',
     mode: '5v5',
     map: '召唤师峡谷',
@@ -113,17 +114,31 @@ const initialSchedules: ScheduleItem[] = [
     id: 'sched_008',
     title: 'CS2 娱乐局',
     time: '20:00',
-    date: '周一',
+    date: '周五',
     dateIndex: 4,
     game: 'csgo',
     mode: '5v5',
     map: 'Mirage',
     opponent: '铁血军团',
     opponentLogo: 'https://picsum.photos/id/8/200/200',
+    status: 'finished',
+    type: 'scrim',
+    recordId: 'record_005'
+  },
+  {
+    id: 'sched_009',
+    title: '周三训练赛',
+    time: '20:00',
+    date: '周三',
+    dateIndex: 2,
+    game: 'lol',
+    mode: '5v5',
+    map: '召唤师峡谷',
+    opponent: '闪电战队',
+    opponentLogo: 'https://picsum.photos/id/9/200/200',
     status: 'confirmed',
     type: 'scrim',
-    status: 'finished',
-    recordId: 'record_005'
+    members: myTeam.members
   }
 ];
 
@@ -138,6 +153,7 @@ interface AppState {
   getGameRecordById: (id: string) => GameRecord | undefined;
 
   acceptMatchRequest: (matchId: string) => void;
+  simulateMatchAccepted: (matchId: string) => void;
 
   confirmSchedule: (id: string) => void;
   finishSchedule: (id: string) => void;
@@ -146,7 +162,7 @@ interface AppState {
   getScheduleById: (id: string) => ScheduleItem | undefined;
   getSchedulesByDateIndex: (dateIndex: number) => ScheduleItem[];
 
-  addGameRecordFromSchedule: (scheduleId: string, record: Omit<GameRecord, 'id' | 'game' | 'mode' | 'map' | 'ourTeam' | 'opponentTeam' | 'time'>) => void;
+  addGameRecordFromSchedule: (scheduleId: string, record: Omit<GameRecord, 'id' | 'game' | 'mode' | 'map' | 'ourTeam' | 'opponentTeam' | 'time'>) => string | undefined;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -203,6 +219,39 @@ export const useAppStore = create<AppState>((set, get) => ({
       opponentLogo: match.teamLogo,
       status: 'pending',
       type: 'scrim',
+      members: myTeam.members,
+      matchRequestId: matchId
+    };
+
+    set((state) => ({
+      scheduleList: [...state.scheduleList, newSchedule]
+    }));
+  },
+
+  simulateMatchAccepted: (matchId) => {
+    const match = get().matchRequests.find((m) => m.id === matchId);
+    if (!match || !match.isMine) return;
+
+    set((state) => ({
+      matchRequests: state.matchRequests.map((m) =>
+        m.id === matchId ? { ...m, status: 'matched' } : m
+      )
+    }));
+
+    const newSchedule: ScheduleItem = {
+      id: `sched_${Date.now()}`,
+      title: `训练赛 vs 挑战者战队`,
+      time: match.time,
+      date: dateLabels[match.dateIndex ?? 0] || '今天',
+      dateIndex: match.dateIndex ?? 0,
+      game: match.game,
+      mode: match.mode,
+      map: match.map,
+      opponent: '挑战者战队',
+      opponentLogo: 'https://picsum.photos/id/25/200/200',
+      status: 'pending',
+      type: 'scrim',
+      members: myTeam.members,
       matchRequestId: matchId
     };
 
@@ -254,7 +303,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   addGameRecordFromSchedule: (scheduleId, record) => {
     const schedule = get().scheduleList.find((s) => s.id === scheduleId);
-    if (!schedule) return;
+    if (!schedule) return undefined;
 
     const newRecord: GameRecord = {
       ...record,

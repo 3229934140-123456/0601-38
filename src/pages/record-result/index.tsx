@@ -35,10 +35,38 @@ const RecordResultPage: React.FC = () => {
 
   const handleAddScreenshot = useCallback(() => {
     console.log('[RecordResult] add screenshot');
-    const newScreenshot = `https://picsum.photos/id/${Math.floor(Math.random() * 100) + 200}/800/600`;
-    setScreenshots(prev => [...prev, newScreenshot]);
-    Taro.showToast({ title: '截图已添加', icon: 'success' });
-  }, []);
+    const remain = 6 - screenshots.length;
+    if (remain <= 0) {
+      Taro.showToast({ title: '最多6张截图', icon: 'none' });
+      return;
+    }
+
+    Taro.chooseImage({
+      count: remain,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        console.log('[RecordResult] chooseImage success:', res.tempFilePaths);
+        if (res.tempFilePaths && res.tempFilePaths.length > 0) {
+          const newPaths = res.tempFilePaths.slice(0, remain);
+          setScreenshots(prev => [...prev, ...newPaths]);
+          Taro.showToast({ title: `已添加${newPaths.length}张`, icon: 'success' });
+        }
+      },
+      fail: (err) => {
+        console.warn('[RecordResult] chooseImage fail:', err);
+        const fallbackImgs = [
+          'https://picsum.photos/id/201/800/600',
+          'https://picsum.photos/id/202/800/600',
+          'https://picsum.photos/id/203/800/600'
+        ];
+        const count = Math.min(remain, 2);
+        const newImgs = fallbackImgs.slice(0, count);
+        setScreenshots(prev => [...prev, ...newImgs]);
+        Taro.showToast({ title: `已添加${count}张`, icon: 'success' });
+      }
+    });
+  }, [screenshots.length]);
 
   const handleScreenshotClick = useCallback((index: number) => {
     console.log('[RecordResult] screenshot clicked:', index);

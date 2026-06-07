@@ -6,10 +6,10 @@ import classnames from 'classnames';
 import Tag from '@/components/Tag';
 import EmptyState from '@/components/EmptyState';
 import { useAppStore } from '@/store';
-import { myTeam, dateLabels } from '@/store';
+import { myTeam } from '@/store';
 import { GAME_NAMES } from '@/types';
 
-const weekDays = ['周六', '周日', '周一', '周二', '周三', '周四', '周五'];
+const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 const SchedulePage: React.FC = () => {
   const [activeDate, setActiveDate] = useState(0);
@@ -25,8 +25,8 @@ const SchedulePage: React.FC = () => {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
       const day = i === 0 ? '今天' : i === 1 ? '明天' : String(d.getDate()).padStart(2, '0');
-      const weekday = weekDays[(d.getDay() + 6) % 7];
-      return { day, weekday, isToday: i === 0 };
+      const weekday = weekDays[d.getDay()];
+      return { day, weekday, isToday: i === 0, date: d };
     });
   }, []);
 
@@ -37,13 +37,14 @@ const SchedulePage: React.FC = () => {
   const sectionTitle = useMemo(() => {
     if (activeDate === 0) return '今日赛程';
     if (activeDate === 1) return '明日赛程';
-    return `${dateLabels[activeDate] || dates[activeDate]?.weekday || ''}赛程`;
+    const weekday = dates[activeDate]?.weekday || '';
+    return `${weekday}赛程`;
   }, [activeDate, dates]);
 
   const handleDateChange = useCallback((index: number) => {
-    console.log('[Schedule] date changed:', index, dateLabels[index]);
+    console.log('[Schedule] date changed:', index, dates[index]?.weekday);
     setActiveDate(index);
-  }, []);
+  }, [dates]);
 
   const handleCardClick = useCallback((id: string) => {
     console.log('[Schedule] card clicked:', id);
@@ -80,12 +81,18 @@ const SchedulePage: React.FC = () => {
     });
   }, [toggleReminder, hasReminder]);
 
-  const handleRecordResult = useCallback((id: string, e?: React.MouseEvent) => {
+  const handleRecordResult = useCallback((item: any, e?: React.MouseEvent) => {
     e?.stopPropagation?.();
-    console.log('[Schedule] record result:', id);
-    Taro.navigateTo({ url: `/pages/record-result/index?scheduleId=${id}` }).catch(err => {
-      console.error('[Schedule] navigate record error:', err);
-    });
+    console.log('[Schedule] record result:', item.id);
+    if (item.recordId) {
+      Taro.navigateTo({ url: `/pages/review/index?id=${item.recordId}` }).catch(err => {
+        console.error('[Schedule] navigate review error:', err);
+      });
+    } else {
+      Taro.navigateTo({ url: `/pages/record-result/index?scheduleId=${item.id}` }).catch(err => {
+        console.error('[Schedule] navigate record error:', err);
+      });
+    }
   }, []);
 
   const getStatusTag = (status: string) => {
@@ -243,7 +250,7 @@ const SchedulePage: React.FC = () => {
                   </View>
                   <View
                     className={classnames(styles.actionBtn, styles.actionBtnPrimary)}
-                    onClick={(e) => handleRecordResult(item.id, e)}
+                    onClick={(e) => handleRecordResult(item, e)}
                   >
                     <Text>{item.recordId ? '查看战绩' : '录入战绩'}</Text>
                   </View>

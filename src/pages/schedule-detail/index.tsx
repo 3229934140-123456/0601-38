@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, Image, ScrollView, Switch } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import styles from './index.module.scss';
@@ -12,27 +12,22 @@ const ScheduleDetailPage: React.FC = () => {
   const router = useRouter();
   const scheduleId = router.params.id || '';
 
-  const getScheduleById = useAppStore((state) => state.getScheduleById);
+  const scheduleList = useAppStore((state) => state.scheduleList);
   const confirmSchedule = useAppStore((state) => state.confirmSchedule);
   const toggleReminder = useAppStore((state) => state.toggleReminder);
   const hasReminder = useAppStore((state) => state.hasReminder);
-  const getGameRecordById = useAppStore((state) => state.getGameRecordById);
 
-  const [schedule, setSchedule] = useState<any>(null);
-  const [reminder, setReminder] = useState(false);
+  const schedule = useMemo(() => {
+    return scheduleList.find((s) => s.id === scheduleId);
+  }, [scheduleList, scheduleId]);
 
-  useEffect(() => {
-    const data = getScheduleById(scheduleId);
-    if (data) {
-      setSchedule(data);
-      setReminder(hasReminder(scheduleId));
-    }
-  }, [scheduleId, getScheduleById, hasReminder]);
+  const reminder = useMemo(() => {
+    return hasReminder(scheduleId);
+  }, [hasReminder, scheduleId]);
 
   const handleReminderChange = useCallback((checked: boolean) => {
     console.log('[ScheduleDetail] reminder changed:', checked);
     toggleReminder(scheduleId);
-    setReminder(checked);
     Taro.showToast({
       title: checked ? '已设置提醒' : '已取消提醒',
       icon: 'success'
@@ -49,7 +44,6 @@ const ScheduleDetailPage: React.FC = () => {
       success: (res) => {
         if (res.confirm) {
           confirmSchedule(scheduleId);
-          setSchedule((prev: any) => prev ? { ...prev, status: 'confirmed' } : prev);
           Taro.showToast({ title: '已确认', icon: 'success' });
         }
       }
@@ -100,6 +94,13 @@ const ScheduleDetailPage: React.FC = () => {
     }
   };
 
+  const getMembers = () => {
+    if (schedule?.members && schedule.members.length > 0) {
+      return schedule.members;
+    }
+    return myTeam.members;
+  };
+
   if (!schedule) {
     return (
       <View className={styles.page}>
@@ -109,6 +110,8 @@ const ScheduleDetailPage: React.FC = () => {
       </View>
     );
   }
+
+  const members = getMembers();
 
   return (
     <View className={styles.page}>
@@ -191,11 +194,11 @@ const ScheduleDetailPage: React.FC = () => {
           </Text>
         </View>
 
-        {(schedule.members && schedule.members.length > 0) && (
+        {members.length > 0 && (
           <View className={styles.infoCard}>
-            <Text className={styles.cardTitle}>参赛成员</Text>
+            <Text className={styles.cardTitle}>参赛成员（{members.length}人）</Text>
             <View className={styles.memberList}>
-              {schedule.members.map((member: any) => (
+              {members.map((member: any) => (
                 <View key={member.id} className={styles.memberItem}>
                   <Image className={styles.memberAvatar} src={member.avatar} mode="aspectFill" />
                   <View className={styles.memberInfo}>

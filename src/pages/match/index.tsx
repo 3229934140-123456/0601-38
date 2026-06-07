@@ -55,6 +55,7 @@ const MatchPage: React.FC = () => {
   const matchRequests = useAppStore((state) => state.matchRequests);
   const addMatchRequest = useAppStore((state) => state.addMatchRequest);
   const acceptMatchRequest = useAppStore((state) => state.acceptMatchRequest);
+  const simulateMatchAccepted = useAppStore((state) => state.simulateMatchAccepted);
 
   const [activeTab, setActiveTab] = useState('约战大厅');
   const [activeGame, setActiveGame] = useState('全部');
@@ -179,6 +180,23 @@ const MatchPage: React.FC = () => {
     setActiveTab('我的约战');
     setFormDesc('');
   }, [formGame, formRank, formMode, formMap, formTime, formDesc, addMatchRequest]);
+
+  const handleSimulateAccept = useCallback((matchId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation?.();
+    console.log('[Match] simulate accept:', matchId);
+    Taro.showModal({
+      title: '模拟对方接受',
+      content: '模拟一支队伍接受了你的约战，将生成一条待确认赛程',
+      confirmText: '确定',
+      confirmColor: '#7B2FFD',
+      success: (res) => {
+        if (res.confirm) {
+          simulateMatchAccepted(matchId);
+          Taro.showToast({ title: '对方已接受！', icon: 'success' });
+        }
+      }
+    });
+  }, [simulateMatchAccepted]);
 
   const getStatusTag = (status: string) => {
     switch (status) {
@@ -328,12 +346,15 @@ const MatchPage: React.FC = () => {
                   </View>
                 )}
                 {activeTab === '我的约战' && match.status === 'looking' && (
-                  <View className={styles.mineBtn}>
-                    <Text>等待中</Text>
+                  <View
+                    className={styles.acceptBtn}
+                    onClick={(e) => handleSimulateAccept(match.id, e)}
+                  >
+                    <Text>模拟对方接受</Text>
                   </View>
                 )}
                 {activeTab === '我的约战' && match.status === 'matched' && (
-                  <View className={styles.acceptBtn} onClick={() => {
+                  <View className={styles.mineBtn} onClick={() => {
                     Taro.navigateTo({ url: '/pages/schedule/index' }).catch(() => {});
                   }}>
                     <Text>查看赛程</Text>
