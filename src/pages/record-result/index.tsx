@@ -55,15 +55,6 @@ const RecordResultPage: React.FC = () => {
       },
       fail: (err) => {
         console.warn('[RecordResult] chooseImage fail:', err);
-        const fallbackImgs = [
-          'https://picsum.photos/id/201/800/600',
-          'https://picsum.photos/id/202/800/600',
-          'https://picsum.photos/id/203/800/600'
-        ];
-        const count = Math.min(remain, 2);
-        const newImgs = fallbackImgs.slice(0, count);
-        setScreenshots(prev => [...prev, ...newImgs]);
-        Taro.showToast({ title: `已添加${count}张`, icon: 'success' });
       }
     });
   }, [screenshots.length]);

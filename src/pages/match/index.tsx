@@ -27,10 +27,10 @@ const timeOptions = [
   { label: '今晚 22:00', dateIndex: 0 },
   { label: '明天 19:00', dateIndex: 1 },
   { label: '明天 20:00', dateIndex: 1 },
-  { label: '周六 14:00', dateIndex: 2 },
-  { label: '周六 19:00', dateIndex: 2 },
-  { label: '周日 14:00', dateIndex: 3 },
-  { label: '周日 19:00', dateIndex: 3 }
+  { label: '周六 14:00', dateIndex: 5 },
+  { label: '周六 19:00', dateIndex: 5 },
+  { label: '周日 14:00', dateIndex: 6 },
+  { label: '周日 19:00', dateIndex: 6 }
 ];
 
 const gameKeyMap: Record<string, string> = {

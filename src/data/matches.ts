@@ -11,6 +11,7 @@ export const matchRequests: MatchRequest[] = [
     mode: '5v5',
     map: '召唤师峡谷',
     time: '今晚 20:00',
+    dateIndex: 0,
     description: '找实力相当的队伍练手，要求守时，不喷人',
     status: 'looking',
     createTime: '2024-06-08 14:30'
@@ -25,6 +26,7 @@ export const matchRequests: MatchRequest[] = [
     mode: '5v5',
     map: 'Bind',
     time: '今晚 21:00',
+    dateIndex: 0,
     description: '铂金段位训练赛，互相学习进步',
     status: 'looking',
     createTime: '2024-06-08 15:00'
@@ -39,6 +41,7 @@ export const matchRequests: MatchRequest[] = [
     mode: '5v5',
     map: '召唤师峡谷',
     time: '明天 19:00',
+    dateIndex: 1,
     description: '大师以上战队来，打BO3',
     status: 'looking',
     createTime: '2024-06-08 12:00'
@@ -53,6 +56,7 @@ export const matchRequests: MatchRequest[] = [
     mode: '5v5',
     map: 'Mirage',
     time: '今晚 22:00',
+    dateIndex: 0,
     description: '黄金段位娱乐局，开心就好',
     status: 'looking',
     createTime: '2024-06-08 16:20'
@@ -67,6 +71,7 @@ export const matchRequests: MatchRequest[] = [
     mode: '5v5',
     map: '召唤师峡谷',
     time: '周六 14:00',
+    dateIndex: 5,
     description: '周末训练赛，欢迎新人队伍',
     status: 'looking',
     createTime: '2024-06-07 20:00'
@@ -81,6 +86,7 @@ export const matchRequests: MatchRequest[] = [
     mode: '5v5',
     map: '天辉夜魇',
     time: '周日 15:00',
+    dateIndex: 6,
     description: 'DOTA2 铂金局，来硬实力队伍',
     status: 'looking',
     createTime: '2024-06-08 10:00'
