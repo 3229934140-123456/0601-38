@@ -6,7 +6,9 @@ export default defineAppConfig({
     'pages/record/index',
     'pages/message/index',
     'pages/schedule/index',
-    'pages/review/index'
+    'pages/schedule-detail/index',
+    'pages/review/index',
+    'pages/record-result/index'
   ],
   window: {
     backgroundTextStyle: 'light',

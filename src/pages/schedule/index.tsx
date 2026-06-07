@@ -6,20 +6,10 @@ import classnames from 'classnames';
 import Tag from '@/components/Tag';
 import EmptyState from '@/components/EmptyState';
 import { useAppStore } from '@/store';
-import { myTeam } from '@/data/teams';
+import { myTeam, dateLabels } from '@/store';
 import { GAME_NAMES } from '@/types';
 
-const dates = [
-  { day: '今天', weekday: '周六', isToday: true },
-  { day: '09', weekday: '周日', isToday: false },
-  { day: '10', weekday: '周一', isToday: false },
-  { day: '11', weekday: '周二', isToday: false },
-  { day: '12', weekday: '周三', isToday: false },
-  { day: '13', weekday: '周四', isToday: false },
-  { day: '14', weekday: '周五', isToday: false }
-];
-
-const dateTitles = ['今日赛程', '明日赛程', '周六赛程', '周日赛程', '周一赛程', '周二赛程', '周三赛程'];
+const weekDays = ['周六', '周日', '周一', '周二', '周三', '周四', '周五'];
 
 const SchedulePage: React.FC = () => {
   const [activeDate, setActiveDate] = useState(0);
@@ -29,16 +19,41 @@ const SchedulePage: React.FC = () => {
   const toggleReminder = useAppStore((state) => state.toggleReminder);
   const hasReminder = useAppStore((state) => state.hasReminder);
 
+  const dates = useMemo(() => {
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const day = i === 0 ? '今天' : i === 1 ? '明天' : String(d.getDate()).padStart(2, '0');
+      const weekday = weekDays[(d.getDay() + 6) % 7];
+      return { day, weekday, isToday: i === 0 };
+    });
+  }, []);
+
   const schedules = useMemo(() => {
     return getSchedulesByDateIndex(activeDate);
   }, [activeDate, getSchedulesByDateIndex]);
 
+  const sectionTitle = useMemo(() => {
+    if (activeDate === 0) return '今日赛程';
+    if (activeDate === 1) return '明日赛程';
+    return `${dateLabels[activeDate] || dates[activeDate]?.weekday || ''}赛程`;
+  }, [activeDate, dates]);
+
   const handleDateChange = useCallback((index: number) => {
-    console.log('[Schedule] date changed:', index);
+    console.log('[Schedule] date changed:', index, dateLabels[index]);
     setActiveDate(index);
   }, []);
 
-  const handleConfirm = useCallback((id: string) => {
+  const handleCardClick = useCallback((id: string) => {
+    console.log('[Schedule] card clicked:', id);
+    Taro.navigateTo({ url: `/pages/schedule-detail/index?id=${id}` }).catch(err => {
+      console.error('[Schedule] navigate error:', err);
+    });
+  }, []);
+
+  const handleConfirm = useCallback((id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation?.();
     console.log('[Schedule] confirm match:', id);
     Taro.showModal({
       title: '确认参赛',
@@ -54,7 +69,8 @@ const SchedulePage: React.FC = () => {
     });
   }, [confirmSchedule]);
 
-  const handleRemind = useCallback((id: string) => {
+  const handleRemind = useCallback((id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation?.();
     console.log('[Schedule] toggle reminder:', id);
     toggleReminder(id);
     const has = hasReminder(id);
@@ -63,6 +79,14 @@ const SchedulePage: React.FC = () => {
       icon: 'success'
     });
   }, [toggleReminder, hasReminder]);
+
+  const handleRecordResult = useCallback((id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation?.();
+    console.log('[Schedule] record result:', id);
+    Taro.navigateTo({ url: `/pages/record-result/index?scheduleId=${id}` }).catch(err => {
+      console.error('[Schedule] navigate record error:', err);
+    });
+  }, []);
 
   const getStatusTag = (status: string) => {
     switch (status) {
@@ -90,6 +114,12 @@ const SchedulePage: React.FC = () => {
     return GAME_NAMES[gameKey as keyof typeof GAME_NAMES] || gameKey;
   };
 
+  const getOpponentLogo = (item: any) => {
+    if (item.opponentLogo) return item.opponentLogo;
+    if (item.type === 'training') return myTeam.logo;
+    return 'https://picsum.photos/id/10/200/200';
+  };
+
   return (
     <View className={styles.page}>
       <View className={styles.dateBar}>
@@ -115,12 +145,13 @@ const SchedulePage: React.FC = () => {
       </View>
 
       <View className={styles.section}>
-        <Text className={styles.sectionTitle}>{dateTitles[activeDate] || '赛程'}</Text>
+        <Text className={styles.sectionTitle}>{sectionTitle}</Text>
         {schedules.length > 0 ? (
           schedules.map(item => (
             <View
               key={item.id}
               className={classnames(styles.matchCard, item.status)}
+              onClick={() => handleCardClick(item.id)}
             >
               <View className={styles.matchHeader}>
                 <Text className={styles.matchTime}>{item.time}</Text>
@@ -141,7 +172,7 @@ const SchedulePage: React.FC = () => {
                   <Text className={styles.teamNameSmall}>{item.opponent}</Text>
                   <Image
                     className={classnames(styles.teamLogoSmall, styles.teamLogoRight)}
-                    src="https://picsum.photos/id/2/200/200"
+                    src={getOpponentLogo(item)}
                     mode="aspectFill"
                   />
                 </View>
@@ -152,10 +183,12 @@ const SchedulePage: React.FC = () => {
                   <Text className={styles.infoIcon}>🎮</Text>
                   <Text>{getGameName(item.game)}</Text>
                 </View>
-                <View className={styles.infoItem}>
-                  <Text className={styles.infoIcon}>📍</Text>
-                  <Text>线上</Text>
-                </View>
+                {item.map && (
+                  <View className={styles.infoItem}>
+                    <Text className={styles.infoIcon}>📍</Text>
+                    <Text>{item.map}</Text>
+                  </View>
+                )}
                 {getStatusTag(item.status)}
                 {hasReminder(item.id) && (
                   <Tag text="已设提醒" type="info" size="sm" />
@@ -166,13 +199,13 @@ const SchedulePage: React.FC = () => {
                 <View className={styles.matchActions}>
                   <View
                     className={classnames(styles.actionBtn, styles.actionBtnSecondary)}
-                    onClick={() => {}}
+                    onClick={(e) => e.stopPropagation?.()}
                   >
                     <Text>拒绝</Text>
                   </View>
                   <View
                     className={classnames(styles.actionBtn, styles.actionBtnPrimary)}
-                    onClick={() => handleConfirm(item.id)}
+                    onClick={(e) => handleConfirm(item.id, e)}
                   >
                     <Text>确认参赛</Text>
                   </View>
@@ -187,15 +220,32 @@ const SchedulePage: React.FC = () => {
                       styles.actionBtnSecondary,
                       hasReminder(item.id) && styles.actionBtnActive
                     )}
-                    onClick={() => handleRemind(item.id)}
+                    onClick={(e) => handleRemind(item.id, e)}
                   >
                     <Text>{hasReminder(item.id) ? '取消提醒' : '设置提醒'}</Text>
                   </View>
                   <View
                     className={classnames(styles.actionBtn, styles.actionBtnPrimary)}
-                    onClick={() => {}}
+                    onClick={(e) => e.stopPropagation?.()}
                   >
                     <Text>进入房间</Text>
+                  </View>
+                </View>
+              )}
+
+              {item.status === 'finished' && (
+                <View className={styles.matchActions}>
+                  <View
+                    className={classnames(styles.actionBtn, styles.actionBtnSecondary)}
+                    onClick={(e) => e.stopPropagation?.()}
+                  >
+                    <Text>查看详情</Text>
+                  </View>
+                  <View
+                    className={classnames(styles.actionBtn, styles.actionBtnPrimary)}
+                    onClick={(e) => handleRecordResult(item.id, e)}
+                  >
+                    <Text>{item.recordId ? '查看战绩' : '录入战绩'}</Text>
                   </View>
                 </View>
               )}

@@ -4,6 +4,43 @@
   min-height: 100vh;
   background: $color-bg-page;
   padding-bottom: 120rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabBar {
+  display: flex;
+  background: $color-bg-card;
+  border-bottom: 1rpx solid $color-divider;
+  flex-shrink: 0;
+}
+
+.tabItem {
+  flex: 1;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: $color-text-secondary;
+  font-size: $font-size-md;
+  transition: color $transition-fast;
+
+  &.active {
+    color: $color-text-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.tabIndicator {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48rpx;
+  height: 6rpx;
+  background: linear-gradient(90deg, $color-primary 0%, $color-secondary 100%);
+  border-radius: 3rpx;
 }
 
 .filterBar {
@@ -182,6 +219,10 @@
   font-weight: $font-weight-semibold;
 }
 
+.matchStatus {
+  flex-shrink: 0;
+}
+
 .acceptBtn {
   @include button-reset;
   height: 64rpx;
@@ -201,6 +242,18 @@
     background: $color-bg-input;
     color: $color-text-disabled;
   }
+}
+
+.mineBtn {
+  @include button-reset;
+  height: 64rpx;
+  padding: 0 $spacing-lg;
+  background: $color-bg-input;
+  border-radius: $radius-button;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  border: 1rpx solid $color-border;
 }
 
 .fab {

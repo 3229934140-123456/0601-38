@@ -41,9 +41,11 @@ export interface MatchRequest {
   mode: string;
   map: string;
   time: string;
+  dateIndex?: number;
   description?: string;
   status: 'looking' | 'matched' | 'confirmed' | 'finished' | 'cancelled';
   opponentTeam?: Team;
+  isMine?: boolean;
   createTime: string;
 }
 
@@ -83,11 +85,17 @@ export interface ScheduleItem {
   title: string;
   time: string;
   date: string;
-  dateIndex?: number;
+  dateIndex: number;
   game: string;
+  mode?: string;
+  map?: string;
   opponent: string;
+  opponentLogo?: string;
   status: 'pending' | 'confirmed' | 'finished';
   type: 'scrim' | 'tournament' | 'training';
+  members?: TeamMember[];
+  matchRequestId?: string;
+  recordId?: string;
 }
 
 export interface HeroStats {

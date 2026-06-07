@@ -1,0 +1,255 @@
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: $color-text-secondary;
+  font-size: $font-size-md;
+}
+
+.resultHeader {
+  padding: $spacing-xl $page-padding;
+  padding-top: calc($spacing-xl + env(safe-area-inset-top));
+  background: linear-gradient(135deg, $color-success 0%, $color-secondary 100%);
+  color: $color-text-white;
+
+  &.win {
+    background: linear-gradient(135deg, $color-success 0%, $color-secondary 100%);
+  }
+
+  &.lose {
+    background: linear-gradient(135deg, $color-error 0%, $color-primary 100%);
+  }
+
+  &.draw {
+    background: linear-gradient(135deg, $color-warning 0%, $color-primary 100%);
+  }
+}
+
+.resultText {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  text-align: center;
+  margin-bottom: $spacing-lg;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+}
+
+.scoreTeam {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.teamLogo {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  border: 3rpx solid rgba(255, 255, 255, 0.3);
+}
+
+.teamName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  max-width: 180rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scoreInput {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-lg;
+  padding: $spacing-xs $spacing-sm;
+}
+
+.scoreBtn {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+.scoreNum {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  min-width: 60rpx;
+  text-align: center;
+}
+
+.vsText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.matchMeta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  opacity: 0.9;
+}
+
+.metaItem {
+  font-size: $font-size-xs;
+}
+
+.content {
+  flex: 1;
+  padding: $spacing-lg $page-padding;
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+
+.infoCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  border: 1rpx solid $color-divider;
+}
+
+.cardTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.formRow {
+  @include flex-between;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-divider;
+  align-items: flex-start;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.formLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  width: 160rpx;
+  flex-shrink: 0;
+  padding-top: $spacing-xs;
+}
+
+.formInputWrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.formInput {
+  width: 100%;
+  min-height: 48rpx;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  text-align: right;
+}
+
+.screenshotGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.screenshotItem {
+  width: calc((100% - #{$spacing-sm} * 2) / 3);
+  aspect-ratio: 4 / 3;
+  border-radius: $radius-md;
+  overflow: hidden;
+  position: relative;
+  background: $color-bg-input;
+}
+
+.screenshotImg {
+  width: 100%;
+  height: 100%;
+}
+
+.addScreenshot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  border: 2rpx dashed $color-border;
+  background: $color-bg-input;
+}
+
+.addIcon {
+  font-size: $font-size-xxl;
+  color: $color-text-tertiary;
+}
+
+.addText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.noteInput {
+  width: 100%;
+  min-height: 160rpx;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  background: $color-bg-input;
+  color: $color-text-primary;
+  font-size: $font-size-sm;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  background: $color-bg-card;
+  border-top: 1rpx solid $color-divider;
+  z-index: 100;
+}
+
+.submitBtn {
+  @include button-reset;
+  width: 100%;
+  height: 88rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-secondary 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    opacity: 0.9;
+  }
+}

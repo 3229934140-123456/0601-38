@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, Image, ScrollView, Input, Textarea } from '@tarojs/components';
+import { View, Text, Image, ScrollView, Textarea } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import classnames from 'classnames';
@@ -12,6 +12,7 @@ import { myTeam } from '@/data/teams';
 const games = ['全部', '英雄联盟', 'VALORANT', 'CS2', 'DOTA2', '守望先锋2'];
 const ranks = ['全部段位', '青铜', '白银', '黄金', '铂金', '钻石', '大师', '王者'];
 const modes = ['全部模式', '5v5', '3v3', '1v1'];
+const tabs = ['约战大厅', '我的约战'];
 const maps: Record<string, string[]> = {
   '英雄联盟': ['召唤师峡谷', '扭曲丛林', '嚎哭深渊'],
   'VALORANT': ['Bind', 'Haven', 'Split', 'Ascent', 'Icebox'],
@@ -19,7 +20,18 @@ const maps: Record<string, string[]> = {
   'DOTA2': ['天辉夜魇'],
   '守望先锋2': ['国王大道', '漓江塔', '花村']
 };
-const times = ['今晚 19:00', '今晚 20:00', '今晚 21:00', '今晚 22:00', '明天 19:00', '明天 20:00', '周末 14:00', '周末 19:00'];
+const timeOptions = [
+  { label: '今晚 19:00', dateIndex: 0 },
+  { label: '今晚 20:00', dateIndex: 0 },
+  { label: '今晚 21:00', dateIndex: 0 },
+  { label: '今晚 22:00', dateIndex: 0 },
+  { label: '明天 19:00', dateIndex: 1 },
+  { label: '明天 20:00', dateIndex: 1 },
+  { label: '周六 14:00', dateIndex: 2 },
+  { label: '周六 19:00', dateIndex: 2 },
+  { label: '周日 14:00', dateIndex: 3 },
+  { label: '周日 19:00', dateIndex: 3 }
+];
 
 const gameKeyMap: Record<string, string> = {
   '英雄联盟': 'lol',
@@ -42,7 +54,9 @@ const rankKeyMap: Record<string, string> = {
 const MatchPage: React.FC = () => {
   const matchRequests = useAppStore((state) => state.matchRequests);
   const addMatchRequest = useAppStore((state) => state.addMatchRequest);
+  const acceptMatchRequest = useAppStore((state) => state.acceptMatchRequest);
 
+  const [activeTab, setActiveTab] = useState('约战大厅');
   const [activeGame, setActiveGame] = useState('全部');
   const [activeRank, setActiveRank] = useState('全部段位');
   const [activeMode, setActiveMode] = useState('全部模式');
@@ -55,8 +69,11 @@ const MatchPage: React.FC = () => {
   const [formTime, setFormTime] = useState('今晚 20:00');
   const [formDesc, setFormDesc] = useState('');
 
-  const filteredList = useMemo(() => {
+  const hallList = useMemo(() => {
     return matchRequests.filter((match) => {
+      if (match.isMine) return false;
+      if (match.status !== 'looking') return false;
+
       if (activeGame !== '全部') {
         const gameKey = gameKeyMap[activeGame] || activeGame;
         if (match.game !== gameKey) return false;
@@ -71,6 +88,17 @@ const MatchPage: React.FC = () => {
       return true;
     });
   }, [matchRequests, activeGame, activeRank, activeMode]);
+
+  const myList = useMemo(() => {
+    return matchRequests.filter((match) => match.isMine);
+  }, [matchRequests]);
+
+  const displayList = activeTab === '约战大厅' ? hallList : myList;
+
+  const handleTabChange = useCallback((tab: string) => {
+    console.log('[Match] tab changed:', tab);
+    setActiveTab(tab);
+  }, []);
 
   const handleGameChange = useCallback((game: string) => {
     console.log('[Match] filter game:', game);
@@ -89,7 +117,8 @@ const MatchPage: React.FC = () => {
     setActiveMode(modes[nextIndex]);
   }, [activeMode]);
 
-  const handleAccept = useCallback((matchId: string) => {
+  const handleAccept = useCallback((matchId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation?.();
     console.log('[Match] accept match:', matchId);
     Taro.showModal({
       title: '确认约战',
@@ -98,11 +127,15 @@ const MatchPage: React.FC = () => {
       confirmColor: '#7B2FFD',
       success: (res) => {
         if (res.confirm) {
+          acceptMatchRequest(matchId);
           Taro.showToast({ title: '约战成功！', icon: 'success' });
+          setTimeout(() => {
+            Taro.navigateTo({ url: '/pages/schedule/index' }).catch(() => {});
+          }, 1000);
         }
       }
     });
-  }, []);
+  }, [acceptMatchRequest]);
 
   const handlePublish = useCallback(() => {
     console.log('[Match] publish match');
@@ -126,6 +159,7 @@ const MatchPage: React.FC = () => {
 
     const gameKey = gameKeyMap[formGame] || 'lol';
     const rankKey = rankKeyMap[formRank] || 'diamond';
+    const timeOption = timeOptions.find(t => t.label === formTime);
 
     addMatchRequest({
       teamId: myTeam.id,
@@ -136,18 +170,32 @@ const MatchPage: React.FC = () => {
       mode: formMode,
       map: formMap,
       time: formTime,
+      dateIndex: timeOption?.dateIndex ?? 0,
       description: formDesc || '寻找势均力敌的对手'
     });
 
     setShowPublishModal(false);
     Taro.showToast({ title: '发布成功！', icon: 'success' });
-
+    setActiveTab('我的约战');
     setFormDesc('');
   }, [formGame, formRank, formMode, formMap, formTime, formDesc, addMatchRequest]);
 
-  const handleCardClick = useCallback((matchId: string) => {
-    console.log('[Match] card clicked:', matchId);
-  }, []);
+  const getStatusTag = (status: string) => {
+    switch (status) {
+      case 'looking':
+        return <Tag text="寻找中" type="primary" size="sm" />;
+      case 'matched':
+        return <Tag text="已匹配" type="success" size="sm" />;
+      case 'confirmed':
+        return <Tag text="已确认" type="info" size="sm" />;
+      case 'finished':
+        return <Tag text="已完成" type="default" size="sm" />;
+      case 'cancelled':
+        return <Tag text="已取消" type="error" size="sm" />;
+      default:
+        return <Tag text="未知" type="default" size="sm" />;
+    }
+  };
 
   const getRankColor = (rank: string) => {
     const colorMap: Record<string, string> = {
@@ -174,53 +222,64 @@ const MatchPage: React.FC = () => {
 
   return (
     <View className={styles.page}>
-      <View className={styles.filterBar}>
-        <ScrollView
-          className={styles.gameTabs}
-          scrollX
-          showScrollbar={false}
-        >
-          {games.map(game => (
-            <View
-              key={game}
-              className={classnames(styles.gameTab, activeGame === game && styles.active)}
-              onClick={() => handleGameChange(game)}
-            >
-              <Text>{game}</Text>
-            </View>
-          ))}
-        </ScrollView>
-
-        <View className={styles.quickFilters}>
+      <View className={styles.tabBar}>
+        {tabs.map(tab => (
           <View
-            className={classnames(styles.filterChip, activeRank !== '全部段位' && styles.active)}
-            onClick={handleRankChange}
+            key={tab}
+            className={classnames(styles.tabItem, activeTab === tab && styles.active)}
+            onClick={() => handleTabChange(tab)}
           >
-            <Text>{activeRank}</Text>
-            <Text className={styles.filterChipIcon}>▼</Text>
+            <Text>{tab}</Text>
+            {activeTab === tab && <View className={styles.tabIndicator} />}
           </View>
-          <View
-            className={classnames(styles.filterChip, activeMode !== '全部模式' && styles.active)}
-            onClick={handleModeChange}
+        ))}
+      </View>
+
+      {activeTab === '约战大厅' && (
+        <View className={styles.filterBar}>
+          <ScrollView
+            className={styles.gameTabs}
+            scrollX
+            showScrollbar={false}
           >
-            <Text>{activeMode}</Text>
-            <Text className={styles.filterChipIcon}>▼</Text>
+            {games.map(game => (
+              <View
+                key={game}
+                className={classnames(styles.gameTab, activeGame === game && styles.active)}
+                onClick={() => handleGameChange(game)}
+              >
+                <Text>{game}</Text>
+              </View>
+            ))}
+          </ScrollView>
+
+          <View className={styles.quickFilters}>
+            <View
+              className={classnames(styles.filterChip, activeRank !== '全部段位' && styles.active)}
+              onClick={handleRankChange}
+            >
+              <Text>{activeRank}</Text>
+              <Text className={styles.filterChipIcon}>▼</Text>
+            </View>
+            <View
+              className={classnames(styles.filterChip, activeMode !== '全部模式' && styles.active)}
+              onClick={handleModeChange}
+            >
+              <Text>{activeMode}</Text>
+              <Text className={styles.filterChipIcon}>▼</Text>
+            </View>
           </View>
         </View>
-      </View>
+      )}
 
       <ScrollView
         className={styles.matchList}
         scrollY
         showScrollbar={false}
       >
-        {filteredList.length > 0 ? (
-          filteredList.map(match => (
-            <View
-              key={match.id}
-              className={styles.matchCard}
-              onClick={() => handleCardClick(match.id)}
-            >
+        {displayList.length > 0 ? (
+          displayList.map(match => (
+            <View key={match.id} className={styles.matchCard}>
               <View className={styles.matchCardHeader}>
                 <Image className={styles.teamLogo} src={match.teamLogo} mode="aspectFill" />
                 <View className={styles.teamInfo}>
@@ -236,6 +295,9 @@ const MatchPage: React.FC = () => {
                       {match.mode}
                     </Text>
                   </View>
+                </View>
+                <View className={styles.matchStatus}>
+                  {getStatusTag(match.status)}
                 </View>
               </View>
 
@@ -257,23 +319,34 @@ const MatchPage: React.FC = () => {
                   <Text>胜率: </Text>
                   <Text className={styles.winRateValue}>62.3%</Text>
                 </View>
-                <View
-                  className={styles.acceptBtn}
-                  onClick={(e) => {
-                    e.stopPropagation?.();
-                    handleAccept(match.id);
-                  }}
-                >
-                  <Text>接受约战</Text>
-                </View>
+                {activeTab === '约战大厅' && match.status === 'looking' && (
+                  <View
+                    className={styles.acceptBtn}
+                    onClick={(e) => handleAccept(match.id, e)}
+                  >
+                    <Text>接受约战</Text>
+                  </View>
+                )}
+                {activeTab === '我的约战' && match.status === 'looking' && (
+                  <View className={styles.mineBtn}>
+                    <Text>等待中</Text>
+                  </View>
+                )}
+                {activeTab === '我的约战' && match.status === 'matched' && (
+                  <View className={styles.acceptBtn} onClick={() => {
+                    Taro.navigateTo({ url: '/pages/schedule/index' }).catch(() => {});
+                  }}>
+                    <Text>查看赛程</Text>
+                  </View>
+                )}
               </View>
             </View>
           ))
         ) : (
           <View className={styles.emptyState}>
             <EmptyState
-              title="暂无约战"
-              description="换个筛选条件试试，或者发布一条约战吧"
+              title={activeTab === '约战大厅' ? '暂无约战' : '暂无我的约战'}
+              description={activeTab === '约战大厅' ? '换个筛选条件试试，或者发布一条约战吧' : '点击右下角按钮发布你的第一条约战吧'}
             />
           </View>
         )}
@@ -357,13 +430,13 @@ const MatchPage: React.FC = () => {
               <View className={styles.formGroup}>
                 <Text className={styles.formLabel}>比赛时间</Text>
                 <View className={styles.formOptions}>
-                  {times.map(time => (
+                  {timeOptions.map(opt => (
                     <View
-                      key={time}
-                      className={classnames(styles.formOption, formTime === time && styles.active)}
-                      onClick={() => setFormTime(time)}
+                      key={opt.label}
+                      className={classnames(styles.formOption, formTime === opt.label && styles.active)}
+                      onClick={() => setFormTime(opt.label)}
                     >
-                      <Text>{time}</Text>
+                      <Text>{opt.label}</Text>
                     </View>
                   ))}
                 </View>
